@@ -1,6 +1,7 @@
 import 'package:blood_pressure_recorder/constant.dart';
+import 'package:blood_pressure_recorder/extension/extension.dart';
 import 'package:blood_pressure_recorder/model/blood_pressure.dart';
-import 'package:blood_pressure_recorder/ui/widget/blood_pressure_adder.dart';
+import 'package:blood_pressure_recorder/ui/widget/blood_pressure_adder_form.dart';
 import 'package:blood_pressure_recorder/ui/widget/extended_buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -20,14 +21,19 @@ class _ListPageState extends State<ListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ValueListenableBuilder(
-        valueListenable: Hive.box(bloodPressureBoxName).listenable(),
-        builder: (context, Box box, child) {
+        valueListenable:
+            Hive.box<BloodPressure>(bloodPressureBoxName).listenable(),
+        builder: (context, Box<BloodPressure> box, child) {
+          final orderData = box.orderBox(
+            whereRange: (b) => true,
+            sortRule: orderByDateTimeDesc,
+          );
           return Stack(
             children: [
               ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, id) {
-                  final bloodPressure = box.getAt(id) as BloodPressure;
+                  final bloodPressure = orderData[id];
                   final dateTimeResult =
                       dateFormatter.format(bloodPressure.recordDateTime);
                   return ListTile(
@@ -49,40 +55,21 @@ class _ListPageState extends State<ListPage> {
                         color: Colors.black,
                         size: 40,
                       ),
-                      onPressed: () => box.deleteAt(id),
+                      onPressed: () => box.delete(bloodPressure.hashCode),
                     ),
                   );
                 },
-                itemCount: box.length,
+                itemCount: orderData.length,
               ),
-              AnimatedContainer(
-                curve: Curves.fastLinearToSlowEaseIn,
-                duration: const Duration(milliseconds: 1000),
-                transform: Matrix4.translationValues(
-                  0,
-                  showAdderView ? 0 : 50,
-                  0,
-                ),
-                child: Align(
-                  alignment: FractionalOffset(
-                    showAdderView ? .5 : .5,
-                    showAdderView ? .5 : 2,
-                  ),
-                  child: BloodPressureAdder(
-                    onAddBloodPressurePress: (bloodPressure) {
-                      box.add(bloodPressure);
-                      setState(() {
-                        showAdderView = false;
-                      });
-                    },
-                    onCancelPress: () {
-                      setState(() {
-                        showAdderView = false;
-                      });
-                    },
-                  ),
-                ),
-              )
+              BloodPressureAdderForm(
+                onAddBloodPressurePress: _onAddBloodPressurePress,
+                onCancelPress: () {
+                  setState(() {
+                    showAdderView = false;
+                  });
+                },
+                showAdderView: showAdderView,
+              ),
             ],
           );
         },
@@ -100,5 +87,13 @@ class _ListPageState extends State<ListPage> {
         mode: Mode.list,
       ),
     );
+  }
+
+  void _onAddBloodPressurePress(BloodPressure bloodPressure) {
+    Hive.box<BloodPressure>(bloodPressureBoxName)
+        .put(bloodPressure.hashCode, bloodPressure);
+    setState(() {
+      showAdderView = false;
+    });
   }
 }

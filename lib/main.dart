@@ -17,7 +17,7 @@ void main() async {
 Future initialHive() async {
   await Hive.initFlutter();
   Hive.registerAdapter(BloodPressureAdapter());
-  await Hive.openBox(bloodPressureBoxName);
+  await Hive.openBox<BloodPressure>(bloodPressureBoxName);
 }
 
 class MyApp extends StatelessWidget {

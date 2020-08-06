@@ -26,7 +26,7 @@ class _BloodPressureAdderState extends State<BloodPressureAdder> {
   final heightBloodPressureTextEditingController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +96,7 @@ class _BloodPressureAdderState extends State<BloodPressureAdder> {
                         context: context,
                         initialDate: now,
                         firstDate: DateTime(now.year - 3),
-                        lastDate: DateTime.now(),
+                        lastDate: now,
                       );
                       setState(() {});
                     },
@@ -107,7 +107,7 @@ class _BloodPressureAdderState extends State<BloodPressureAdder> {
                           const Icon(Icons.calendar_today),
                           const SizedBox(width: 10),
                           Text(
-                            DateFormat('yyyy / MM / dd').format(selectedDate),
+                            DateFormat('yyyy / MM / dd').format(selectedDate ?? DateTime.now()),
                           ),
                         ],
                       ),
@@ -167,12 +167,13 @@ class _BloodPressureAdderState extends State<BloodPressureAdder> {
     }
 
     final bloodPressure = BloodPressure(
-      recordDateTime: selectedDate,
+      recordDateTime: selectedDate ?? DateTime.now(),
       lowPressure: int.parse(lowBloodPressureTextEditingController.text),
       heightPressure: int.parse(heightBloodPressureTextEditingController.text),
     );
     widget.onAddBloodPressurePress(bloodPressure);
 
+    selectedDate = null;
     lowBloodPressureTextEditingController.clear();
     heightBloodPressureTextEditingController.clear();
   }

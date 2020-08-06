@@ -1,9 +1,11 @@
 import 'package:blood_pressure_recorder/constant.dart';
-import 'package:blood_pressure_recorder/ui/widget/blood_pressure_adder.dart';
+import 'package:blood_pressure_recorder/extension/extension.dart';
+import 'package:blood_pressure_recorder/model/blood_pressure.dart';
+import 'package:blood_pressure_recorder/ui/widget/blood_pressure_adder_form.dart';
 import 'package:blood_pressure_recorder/ui/widget/date_header.dart';
 import 'package:blood_pressure_recorder/ui/widget/extended_buttons.dart';
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:jiffy/jiffy.dart';
@@ -21,8 +23,9 @@ class _ChartPageState extends State<ChartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ValueListenableBuilder(
-        valueListenable: Hive.box(bloodPressureBoxName).listenable(),
-        builder: (context, Box box, child) {
+        valueListenable:
+            Hive.box<BloodPressure>(bloodPressureBoxName).listenable(),
+        builder: (context, Box<BloodPressure> box, child) {
           return Stack(
             children: [
               Center(
@@ -34,36 +37,18 @@ class _ChartPageState extends State<ChartPage> {
                       onDecreaseMonthPress: _onDecreaseMonthPress,
                       onIncreaseMonthPress: _onIncreaseMonthPress,
                     ),
+                    LineChart(monthlyData(box, chartDisplayTime.month)),
                   ],
                 ),
               ),
-              AnimatedContainer(
-                curve: Curves.fastLinearToSlowEaseIn,
-                duration: const Duration(milliseconds: 1000),
-                transform: Matrix4.translationValues(
-                  0,
-                  showAdderView ? 0 : 50,
-                  0,
-                ),
-                child: Align(
-                  alignment: FractionalOffset(
-                    showAdderView ? .5 : .5,
-                    showAdderView ? .5 : 2,
-                  ),
-                  child: BloodPressureAdder(
-                    onAddBloodPressurePress: (bloodPressure) {
-                      box.add(bloodPressure);
-                      setState(() {
-                        showAdderView = false;
-                      });
-                    },
-                    onCancelPress: () {
-                      setState(() {
-                        showAdderView = false;
-                      });
-                    },
-                  ),
-                ),
+              BloodPressureAdderForm(
+                onAddBloodPressurePress: _onAddBloodPressurePress,
+                onCancelPress: () {
+                  setState(() {
+                    showAdderView = false;
+                  });
+                },
+                showAdderView: showAdderView,
               ),
             ],
           );
@@ -84,6 +69,14 @@ class _ChartPageState extends State<ChartPage> {
     );
   }
 
+  void _onAddBloodPressurePress(BloodPressure bloodPressure) {
+    Hive.box<BloodPressure>(bloodPressureBoxName)
+        .put(bloodPressure.hashCode, bloodPressure);
+    setState(() {
+      showAdderView = false;
+    });
+  }
+
   void _onDecreaseMonthPress() {
     final result = Jiffy(chartDisplayTime).subtract(months: 1);
     setState(() {
@@ -96,5 +89,13 @@ class _ChartPageState extends State<ChartPage> {
     setState(() {
       chartDisplayTime = result;
     });
+  }
+
+  LineChartData monthlyData(Box<BloodPressure> box, int month) {
+    final data = box.orderBox(
+      whereRange: (b) => b.isSameMonthRecord(month),
+      sortRule: orderByDateTimeDesc,
+    );
+    return LineChartData();
   }
 }
