@@ -2,9 +2,10 @@ import 'package:blood_pressure_recorder/constant.dart';
 import 'package:blood_pressure_recorder/extension/extension.dart';
 import 'package:blood_pressure_recorder/model/blood_pressure.dart';
 import 'package:blood_pressure_recorder/ui/widget/blood_pressure_adder_form.dart';
+import 'package:blood_pressure_recorder/ui/widget/blood_pressure_chart.dart';
 import 'package:blood_pressure_recorder/ui/widget/date_header.dart';
+import 'package:blood_pressure_recorder/ui/widget/empty_data_hint.dart';
 import 'package:blood_pressure_recorder/ui/widget/extended_buttons.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -18,6 +19,7 @@ class ChartPage extends StatefulWidget {
 class _ChartPageState extends State<ChartPage> {
   bool showAdderView = false;
   DateTime chartDisplayTime = DateTime.now();
+  Widget animatedWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,8 @@ class _ChartPageState extends State<ChartPage> {
         valueListenable:
             Hive.box<BloodPressure>(bloodPressureBoxName).listenable(),
         builder: (context, Box<BloodPressure> box, child) {
+          final data = getMonthlyData(box, chartDisplayTime);
+
           return Stack(
             children: [
               Center(
@@ -37,7 +41,25 @@ class _ChartPageState extends State<ChartPage> {
                       onDecreaseMonthPress: _onDecreaseMonthPress,
                       onIncreaseMonthPress: _onIncreaseMonthPress,
                     ),
-                    LineChart(monthlyData(box, chartDisplayTime.month)),
+                    AnimatedSwitcher(
+                      transitionBuilder: (child, animation) => ScaleTransition(
+                        scale: animation,
+                        child: child,
+                      ),
+                      duration: const Duration(milliseconds: 5000),
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: data.isEmpty
+                              ? EmptyDataHint()
+                              : BloodPressureChart(
+                                  data: data,
+                                  chartDisplayTime: chartDisplayTime,
+                                ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -91,11 +113,12 @@ class _ChartPageState extends State<ChartPage> {
     });
   }
 
-  LineChartData monthlyData(Box<BloodPressure> box, int month) {
-    final data = box.orderBox(
-      whereRange: (b) => b.isSameMonthRecord(month),
-      sortRule: orderByDateTimeDesc,
-    );
-    return LineChartData();
-  }
+  List<BloodPressure> getMonthlyData(
+    Box<BloodPressure> box,
+    DateTime displayDate,
+  ) =>
+      box.orderBox(
+        whereRange: (b) => b.isSameMonthRecord(displayDate.month),
+        sortRule: orderByDateTimeDesc,
+      );
 }
