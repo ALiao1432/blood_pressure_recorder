@@ -19,7 +19,7 @@ class BloodPressure extends Equatable {
     @required this.heightPressure,
   });
 
-  bool isSameMonthRecord(int month) => recordDateTime.month == month;
+  bool isSameMonthRecord(int year, int month) => recordDateTime.year == year && recordDateTime.month == month;
 
   @override
   List<Object> get props => [recordDateTime, lowPressure, heightPressure];

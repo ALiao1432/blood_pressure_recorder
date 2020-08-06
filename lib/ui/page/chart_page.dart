@@ -52,7 +52,7 @@ class _ChartPageState extends State<ChartPage> {
                         child: Padding(
                           padding: const EdgeInsets.all(20),
                           child: data.isEmpty
-                              ? EmptyDataHint()
+                              ? EmptyDataHint(time: chartDisplayTime,)
                               : BloodPressureChart(
                                   data: data,
                                   chartDisplayTime: chartDisplayTime,
@@ -118,7 +118,7 @@ class _ChartPageState extends State<ChartPage> {
     DateTime displayDate,
   ) =>
       box.orderBox(
-        whereRange: (b) => b.isSameMonthRecord(displayDate.month),
+        whereRange: (b) => b.isSameMonthRecord(displayDate.year, displayDate.month),
         sortRule: orderByDateTimeDesc,
       );
 }
