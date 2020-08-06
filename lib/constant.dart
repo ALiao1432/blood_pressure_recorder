@@ -1,0 +1,1 @@
+const bloodPressureBoxName = 'blood_pressure';
