@@ -8,7 +8,7 @@ class EmptyDataHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('No Data for ${time.year} / ${time.month}'),
+      child: Text('${time.year} / ${time.month} 沒有紀錄'),
     );
   }
 }
