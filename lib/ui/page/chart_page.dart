@@ -6,6 +6,7 @@ import 'package:blood_pressure_recorder/ui/widget/blood_pressure_chart.dart';
 import 'package:blood_pressure_recorder/ui/widget/date_header.dart';
 import 'package:blood_pressure_recorder/ui/widget/empty_data_hint.dart';
 import 'package:blood_pressure_recorder/ui/widget/extended_buttons.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -23,6 +24,10 @@ class _ChartPageState extends State<ChartPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isPortrait =
+        MediaQuery.of(context).orientation == Orientation.portrait;
+
     return Scaffold(
       body: ValueListenableBuilder(
         valueListenable:
@@ -30,52 +35,68 @@ class _ChartPageState extends State<ChartPage> {
         builder: (context, Box<BloodPressure> box, child) {
           final data = getMonthlyData(box, chartDisplayTime);
 
-          return Stack(
-            children: [
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    DateHeader(
-                      displayTime: chartDisplayTime,
-                      onDecreaseMonthPress: _onDecreaseMonthPress,
-                      onIncreaseMonthPress: _onIncreaseMonthPress,
-                    ),
-                    AnimatedSwitcher(
-                      switchOutCurve: Curves.fastLinearToSlowEaseIn,
-                      switchInCurve: Curves.fastLinearToSlowEaseIn,
-                      transitionBuilder: (child, animation) => ScaleTransition(
-                        scale: animation,
-                        child: child,
+          return SafeArea(
+            left: false,
+            right: false,
+            child: Stack(
+              children: [
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      DateHeader(
+                        displayTime: chartDisplayTime,
+                        onDecreaseMonthPress: _onDecreaseMonthPress,
+                        onIncreaseMonthPress: _onIncreaseMonthPress,
                       ),
-                      duration: const Duration(milliseconds: 500),
-                      child: AspectRatio(
-                        key: ValueKey(data.isEmpty),
-                        aspectRatio: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: data.isEmpty
-                              ? EmptyDataHint(time: chartDisplayTime)
-                              : BloodPressureChart(
-                                  data: data,
-                                  chartDisplayTime: chartDisplayTime,
-                                ),
+                      AnimatedSwitcher(
+                        switchOutCurve: Curves.easeInOutQuint,
+                        switchInCurve: Curves.easeInOutQuint,
+                        transitionBuilder: (child, animation) =>
+                            FadeTransition(opacity: animation, child: child),
+                        duration: const Duration(milliseconds: 300),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(Radius.circular(12)),
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.black.withOpacity(.8),
+                                Colors.blueGrey.withOpacity(.1),
+                              ],
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                            ),
+                          ),
+                          key: ValueKey(data.isEmpty),
+                          width:
+                              isPortrait ? size.width * .95 : size.width * .8,
+                          height:
+                              isPortrait ? size.height * .65 : size.height * .5,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: data.isEmpty
+                                ? EmptyDataHint(time: chartDisplayTime)
+                                : BloodPressureChart(
+                                    data: data,
+                                    chartDisplayTime: chartDisplayTime,
+                                  ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              BloodPressureAdderForm(
-                onAddBloodPressurePress: _onAddBloodPressurePress,
-                onCancelPress: () {
-                  setState(() {
-                    showAdderView = false;
-                  });
-                },
-                showAdderView: showAdderView,
-              ),
-            ],
+                BloodPressureAdderForm(
+                  onAddBloodPressurePress: _onAddBloodPressurePress,
+                  onCancelPress: () {
+                    setState(() {
+                      showAdderView = false;
+                    });
+                  },
+                  showAdderView: showAdderView,
+                ),
+              ],
+            ),
           );
         },
       ),

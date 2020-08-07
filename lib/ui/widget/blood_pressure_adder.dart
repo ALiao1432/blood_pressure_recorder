@@ -1,3 +1,4 @@
+import 'package:blood_pressure_recorder/constant.dart';
 import 'package:blood_pressure_recorder/model/blood_pressure.dart';
 import 'package:dough/dough.dart';
 import 'package:flutter/material.dart';
@@ -35,18 +36,10 @@ class _BloodPressureAdderState extends State<BloodPressureAdder> {
 
     return Container(
       width: _width * .8,
-      decoration: const ShapeDecoration(
-        shadows: [
-          BoxShadow(
-            color: Colors.black26,
-            offset: Offset(8, 8),
-            blurRadius: 3,
-          ),
-        ],
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-        ),
+      decoration: BoxDecoration(
+        border: Border.all(width: 2, color: Colors.grey),
+        color: const Color(0xff2e3032),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -107,7 +100,8 @@ class _BloodPressureAdderState extends State<BloodPressureAdder> {
                           const Icon(Icons.calendar_today),
                           const SizedBox(width: 10),
                           Text(
-                            DateFormat('yyyy / MM / dd').format(selectedDate ?? DateTime.now()),
+                            DateFormat('yyyy / MM / dd')
+                                .format(selectedDate ?? DateTime.now()),
                           ),
                         ],
                       ),
@@ -124,7 +118,7 @@ class _BloodPressureAdderState extends State<BloodPressureAdder> {
                           Radius.circular(10),
                         ),
                       ),
-                      color: Colors.white,
+                      color: const Color(0xff505050),
                       onPressed: () => handleRecordButtonPress(),
                       child: const PressableDough(
                         child: Text('紀錄'),
@@ -157,6 +151,13 @@ class _BloodPressureAdderState extends State<BloodPressureAdder> {
   String _validText(String value) {
     if (value.isEmpty) {
       return '不能為空';
+    }
+    final intValue = int.parse(value);
+    if (intValue > maxBloodPressure) {
+      return '超出範圍: $maxBloodPressure';
+    }
+    if (intValue < minBloodPressure) {
+      return '超出範圍: $minBloodPressure';
     }
     return null;
   }

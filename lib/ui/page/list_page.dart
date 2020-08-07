@@ -3,6 +3,7 @@ import 'package:blood_pressure_recorder/extension/extension.dart';
 import 'package:blood_pressure_recorder/model/blood_pressure.dart';
 import 'package:blood_pressure_recorder/ui/widget/blood_pressure_adder_form.dart';
 import 'package:blood_pressure_recorder/ui/widget/extended_buttons.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -40,19 +41,16 @@ class _ListPageState extends State<ListPage> {
                     contentPadding: const EdgeInsets.all(20),
                     title: Text(
                       '高血壓: ${bloodPressure.heightPressure}\n低血壓: ${bloodPressure.lowPressure}',
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.headline1,
                     ),
                     subtitle: Text(
                       dateTimeResult,
-                      style: const TextStyle(fontSize: 20),
+                      style: Theme.of(context).textTheme.headline2,
                     ),
                     trailing: IconButton(
                       icon: const Icon(
                         Icons.delete_forever,
-                        color: Colors.black,
+                        color: Color(0xff9fa1a4),
                         size: 40,
                       ),
                       onPressed: () => box.delete(bloodPressure.hashCode),

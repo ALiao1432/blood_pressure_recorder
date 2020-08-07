@@ -31,7 +31,7 @@ class _BloodPressureAdderFormState extends State<BloodPressureAdderForm> {
       child: Align(
         alignment: FractionalOffset(
           widget.showAdderView ? .5 : .5,
-          widget.showAdderView ? .5 : 2,
+          widget.showAdderView ? .5 : 10,
         ),
         child: BloodPressureAdder(
           onAddBloodPressurePress: widget.onAddBloodPressurePress,

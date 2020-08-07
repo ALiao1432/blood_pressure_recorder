@@ -26,7 +26,7 @@ class ExtendedButtons extends StatelessWidget {
     final rightIcon = mode == Mode.list ? Icons.insert_chart : Icons.list;
 
     return FloatingActionButton.extended(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xff3e4041),
       label: Row(
         children: [
           PressableDough(
@@ -40,6 +40,7 @@ class ExtendedButtons extends StatelessWidget {
               onPressed: onAddPress,
               child: const Icon(
                 Icons.add,
+                color: Colors.white,
               ),
             ),
           ),
@@ -52,13 +53,15 @@ class ExtendedButtons extends StatelessWidget {
                 ),
               ),
               onPressed: onRightPress,
-              child: Icon(rightIcon),
+              child: Icon(
+                rightIcon,
+                color: Colors.white
+              ),
             ),
           ),
         ],
       ),
-      onPressed: () {
-      },
+      onPressed: () {},
     );
   }
 }
