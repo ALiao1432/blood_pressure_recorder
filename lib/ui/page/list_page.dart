@@ -3,8 +3,8 @@ import 'package:blood_pressure_recorder/extension/extension.dart';
 import 'package:blood_pressure_recorder/model/blood_pressure.dart';
 import 'package:blood_pressure_recorder/ui/widget/blood_pressure_adder_form.dart';
 import 'package:blood_pressure_recorder/ui/widget/extended_buttons.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -15,8 +15,21 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> {
-  bool showAdderView = false;
+  bool isShowAdderView = false;
+  bool isShowFAB = true;
   final dateFormatter = DateFormat('yyyy / MM / dd HH:mm');
+  ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController()
+      ..addListener(() {
+        isShowFAB = _scrollController.position.userScrollDirection ==
+            ScrollDirection.forward;
+        setState(() {});
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +45,7 @@ class _ListPageState extends State<ListPage> {
           return Stack(
             children: [
               ListView.builder(
+                controller: _scrollController,
                 physics: const BouncingScrollPhysics(),
                 itemBuilder: (context, id) {
                   final bloodPressure = orderData[id];
@@ -63,27 +77,29 @@ class _ListPageState extends State<ListPage> {
                 onAddBloodPressurePress: _onAddBloodPressurePress,
                 onCancelPress: () {
                   setState(() {
-                    showAdderView = false;
+                    isShowAdderView = false;
                   });
                 },
-                showAdderView: showAdderView,
+                showAdderView: isShowAdderView,
               ),
             ],
           );
         },
       ),
-      floatingActionButton: ExtendedButtons(
-        onAddPress: () {
-          setState(() {
-            showAdderView = true;
-          });
-        },
-        onRightPress: () {
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil('/chart', (route) => false);
-        },
-        mode: Mode.list,
-      ),
+      floatingActionButton: isShowFAB
+          ? ExtendedButtons(
+              onAddPress: () {
+                setState(() {
+                  isShowAdderView = true;
+                });
+              },
+              onRightPress: () {
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/chart', (route) => false);
+              },
+              mode: Mode.list,
+            )
+          : null,
     );
   }
 
@@ -91,7 +107,7 @@ class _ListPageState extends State<ListPage> {
     Hive.box<BloodPressure>(bloodPressureBoxName)
         .put(bloodPressure.hashCode, bloodPressure);
     setState(() {
-      showAdderView = false;
+      isShowAdderView = false;
     });
   }
 }

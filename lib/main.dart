@@ -25,25 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.dark().copyWith(
-        textSelectionColor: const Color(0x7fff3311),
-        accentColor: Colors.grey,
-        textTheme: const TextTheme(
-          headline1: TextStyle(
-            fontSize: 28,
-            color: Color(0xff98a8b9),
-            fontWeight: FontWeight.w600,
-          ),
-          headline2: TextStyle(
-            fontSize: 20,
-            color: Color(0xffb0b0b0),
-          ),
-          headline6: TextStyle(
-            fontSize: 12,
-            color: Color(0xffb0b0b0),
-          ),
-        ),
-      ),
+      theme: getDartThemeData(),
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -65,4 +47,26 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+}
+
+ThemeData getDartThemeData() {
+  return ThemeData.dark().copyWith(
+    textSelectionColor: const Color(0x7fff3311),
+    accentColor: Colors.grey,
+    textTheme: const TextTheme(
+      headline1: TextStyle(
+        fontSize: 28,
+        color: Color(0xff98a8b9),
+        fontWeight: FontWeight.w600,
+      ),
+      headline2: TextStyle(
+        fontSize: 20,
+        color: Color(0xffb0b0b0),
+      ),
+      headline6: TextStyle(
+        fontSize: 12,
+        color: Color(0xffb0b0b0),
+      ),
+    ),
+  );
 }
